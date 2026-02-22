@@ -307,6 +307,19 @@
     margin-bottom: 20px;
   }
 
+  /* ─── STICKY SECTION HEADERS ─── */
+  .page section h2 {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    margin-left: -32px;
+    margin-right: -32px;
+    padding: 20px 32px 12px;
+    background: rgba(10, 11, 15, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
   p { margin-bottom: 14px; color: var(--text); }
   strong { color: #fff; font-weight: 600; }
 
@@ -578,6 +591,34 @@
   .flow-step.split { padding-left: 48px; }
   .flow-step.split .flow-node { width: 24px; height: 24px; font-size: 11px; border-radius: 6px; }
 
+  /* ─── FLOW ANIMATION (CSS scroll-driven) ─── */
+  @supports (animation-timeline: view()) {
+    .flow-node {
+      animation: nodeAppear linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 60%;
+    }
+    .flow-step:not(:last-child)::after {
+      transform-origin: top;
+      animation: drawLine linear both;
+      animation-timeline: view();
+      animation-range: entry 20% entry 100%;
+    }
+    @keyframes nodeAppear {
+      from { transform: scale(0); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    @keyframes drawLine {
+      from { transform: scaleY(0); opacity: 0; }
+      to { transform: scaleY(1); opacity: 0.3; }
+    }
+  }
+
+  /* ─── COUNTER NUMBERS ─── */
+  [data-count-to] {
+    font-variant-numeric: tabular-nums;
+  }
+
   /* ─── ORDERED LISTS ─── */
   ol { margin: 12px 0 16px 0; list-style: none; counter-reset: steps; }
   ol li {
@@ -773,6 +814,7 @@
 
   @media (max-width: 640px) {
     .page { padding: 0 20px 80px; }
+    .page section h2 { margin-left: -20px; margin-right: -20px; padding-left: 20px; padding-right: 20px; }
     section { margin-top: 56px; }
     .hero { min-height: 100vh; }
     .flow-step.split { padding-left: 32px; }
@@ -807,6 +849,8 @@
     .hscroll-progress { display: none !important; }
     .progress-bar { display: none !important; animation: none !important; }
     .scroll-arrow { animation: none !important; }
+    .flow-node { animation: none !important; }
+    .flow-step:not(:last-child)::after { animation: none !important; }
     .hero-scroll-hint { opacity: 1 !important; }
     .hero-badge, .hero h1, .hero-sub {
       opacity: 1 !important;
@@ -1068,11 +1112,11 @@
       <table>
         <thead><tr><th>Indexer</th><th>Original</th><th>On-Chain</th><th>Explorer</th><th>Gap</th></tr></thead>
         <tbody>
-          <tr><td>lunanova</td><td>52,090</td><td>2,786</td><td>2,780</td><td>~6 GRT</td></tr>
-          <tr><td>ellipfra</td><td>52,000</td><td>881</td><td>881</td><td>~0 GRT</td></tr>
-          <tr><td>pinax</td><td>37,230</td><td>93</td><td>93</td><td>~0 GRT</td></tr>
-          <tr><td>wavefive</td><td>25,000</td><td>192</td><td>198</td><td>~6 GRT</td></tr>
-          <tr class="total"><td>Total</td><td>166,320</td><td>3,953</td><td>3,960</td><td>~7 GRT</td></tr>
+          <tr><td>lunanova</td><td><span data-count-to="52090">52,090</span></td><td><span data-count-to="2786">2,786</span></td><td><span data-count-to="2780">2,780</span></td><td>~6 GRT</td></tr>
+          <tr><td>ellipfra</td><td><span data-count-to="52000">52,000</span></td><td><span data-count-to="881">881</span></td><td><span data-count-to="881">881</span></td><td>~0 GRT</td></tr>
+          <tr><td>pinax</td><td><span data-count-to="37230">37,230</span></td><td><span data-count-to="93">93</span></td><td><span data-count-to="93">93</span></td><td>~0 GRT</td></tr>
+          <tr><td>wavefive</td><td><span data-count-to="25000">25,000</span></td><td><span data-count-to="192">192</span></td><td><span data-count-to="198">198</span></td><td>~6 GRT</td></tr>
+          <tr class="total"><td>Total</td><td><span data-count-to="166320">166,320</span></td><td><span data-count-to="3953">3,953</span></td><td><span data-count-to="3960">3,960</span></td><td>~7 GRT</td></tr>
         </tbody>
       </table>
     </div>
@@ -1264,6 +1308,31 @@ sections.forEach(s => navObserver.observe(s));
 
 function smoothScroll(sel) {
   document.querySelector(sel)?.scrollIntoView({ behavior: 'smooth' });
+}
+
+// ─── COUNTER ANIMATION ───
+const countEls = document.querySelectorAll('[data-count-to]');
+if (!prefersReducedMotion && countEls.length) {
+  countEls.forEach(el => { el.textContent = '0'; });
+  const countObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const el = entry.target;
+        const target = parseInt(el.dataset.countTo);
+        const dur = 1200;
+        const t0 = performance.now();
+        function tick(now) {
+          const p = Math.min((now - t0) / dur, 1);
+          const ease = 1 - Math.pow(1 - p, 3);
+          el.textContent = Math.round(target * ease).toLocaleString();
+          if (p < 1) requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+        countObserver.unobserve(el);
+      }
+    });
+  }, { threshold: 0.3 });
+  countEls.forEach(el => countObserver.observe(el));
 }
 
 // ─── RAF LOOP ───
