@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GRT Delegation Guide — Graph Horizon</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0b0f;
+    --bg-elevated: #12141c;
+    --bg-card: rgba(255,255,255,0.03);
+    --bg-glass: rgba(255,255,255,0.04);
+    --border: rgba(255,255,255,0.07);
+    --border-hover: rgba(255,255,255,0.14);
+    --text: #e8e6e1;
+    --text-dim: #8a8a8a;
+    --text-muted: #555;
+    --accent: #6f5ce5;
+    --accent-glow: rgba(111,92,229,0.25);
+    --accent2: #2ecda7;
+    --accent2-glow: rgba(46,205,167,0.2);
+    --green: #34d399;
+    --green-dim: rgba(52,211,153,0.12);
+    --yellow: #fbbf24;
+    --yellow-dim: rgba(251,191,36,0.12);
+    --orange: #f97316;
+    --orange-dim: rgba(249,115,22,0.12);
+    --blue: #60a5fa;
+    --blue-dim: rgba(96,165,250,0.1);
+    --code-bg: rgba(255,255,255,0.04);
+    --code-text: #c4b5fd;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.72;
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  ::selection { background: var(--accent); color: white; }
+
+  /* ─── HERO ─── */
+  .hero {
+    position: relative;
+    min-height: 420px;
+    display: flex;
+    align-items: flex-end;
+    overflow: hidden;
+    padding: 0 0 56px;
+  }
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 30% 20%, rgba(111,92,229,0.18), transparent),
+      radial-gradient(ellipse 60% 50% at 70% 40%, rgba(46,205,167,0.1), transparent),
+      radial-gradient(ellipse 100% 80% at 50% 0%, rgba(111,92,229,0.06), transparent);
+  }
+  .hero-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: linear-gradient(to bottom, black 30%, transparent);
+    animation: gridDrift 20s linear infinite;
+  }
+  @keyframes gridDrift {
+    from { transform: translateY(0); }
+    to { transform: translateY(60px); }
+  }
+  .hero-noise {
+    position: absolute;
+    inset: 0;
+    opacity: 0.35;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    background-size: 256px;
+  }
+  .hero-orb {
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    filter: blur(100px);
+    animation: orbFloat 8s ease-in-out infinite;
+  }
+  .hero-orb.a { background: rgba(111,92,229,0.3); top: -60px; right: 15%; animation-delay: 0s; }
+  .hero-orb.b { background: rgba(46,205,167,0.15); top: 40px; right: 35%; animation-delay: -3s; width: 200px; height: 200px; }
+  @keyframes orbFloat {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(20px, -20px) scale(1.08); }
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 2;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 32px;
+    width: 100%;
+  }
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg-glass);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 6px 16px 6px 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-dim);
+    margin-bottom: 24px;
+    backdrop-filter: blur(12px);
+  }
+  .hero-badge .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent2);
+    box-shadow: 0 0 8px var(--accent2-glow);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(0.85); }
+  }
+  .hero h1 {
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-size: clamp(36px, 5.5vw, 58px);
+    font-weight: 400;
+    line-height: 1.12;
+    letter-spacing: -0.025em;
+    color: #fff;
+    margin-bottom: 16px;
+  }
+  .hero h1 em {
+    font-style: italic;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero-sub {
+    font-size: 17px;
+    color: var(--text-dim);
+    max-width: 540px;
+    line-height: 1.65;
+  }
+
+  /* ─── NAV DOTS ─── */
+  .nav-dots {
+    position: fixed;
+    right: 28px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .nav-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.3s;
+    border: none;
+    padding: 0;
+    position: relative;
+  }
+  .nav-dot:hover, .nav-dot.active {
+    background: var(--accent);
+    box-shadow: 0 0 12px var(--accent-glow);
+    transform: scale(1.4);
+  }
+  .nav-dot .tooltip {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+    color: var(--text-dim);
+    font-family: 'DM Sans', sans-serif;
+  }
+  .nav-dot:hover .tooltip { opacity: 1; }
+  @media (max-width: 900px) { .nav-dots { display: none; } }
+
+  /* ─── PAGE LAYOUT ─── */
+  .page {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 32px 140px;
+  }
+
+  /* ─── SECTIONS ─── */
+  section {
+    margin-top: 80px;
+  }
+
+  /* ─── HEADINGS ─── */
+  h2 {
+    font-family: 'Instrument Serif', serif;
+    font-size: 32px;
+    font-weight: 400;
+    color: #fff;
+    margin-bottom: 8px;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+  h2 .num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--accent);
+    display: block;
+    margin-bottom: 8px;
+    letter-spacing: 0.1em;
+    font-weight: 500;
+  }
+  h3 {
+    font-size: 20px;
+    font-weight: 600;
+    color: #fff;
+    margin-top: 36px;
+    margin-bottom: 8px;
+  }
+  .section-line {
+    width: 40px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 2px;
+    margin-bottom: 20px;
+  }
+
+  p { margin-bottom: 14px; color: var(--text); }
+
+  strong { color: #fff; font-weight: 600; }
+
+  /* ─── CALLOUT ─── */
+  .callout {
+    display: flex;
+    gap: 14px;
+    padding: 20px;
+    border-radius: var(--radius);
+    margin: 20px 0;
+    border: 1px solid var(--border);
+    backdrop-filter: blur(8px);
+  }
+  .callout.quote {
+    background: linear-gradient(135deg, rgba(111,92,229,0.06), rgba(46,205,167,0.04));
+    border-color: rgba(111,92,229,0.2);
+  }
+  .callout.warn {
+    background: var(--yellow-dim);
+    border-color: rgba(251,191,36,0.2);
+  }
+  .callout.info {
+    background: var(--blue-dim);
+    border-color: rgba(96,165,250,0.2);
+  }
+  .callout-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+  .callout-text { flex: 1; font-size: 15px; line-height: 1.65; }
+
+  /* ─── GLASS CARD ─── */
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin: 20px 0;
+    backdrop-filter: blur(12px);
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+  .card:hover {
+    border-color: var(--border-hover);
+    box-shadow: 0 8px 40px rgba(0,0,0,0.2);
+  }
+
+  /* ─── TABLES ─── */
+  .table-wrap {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin: 20px 0;
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  thead { background: rgba(255,255,255,0.03); }
+  th {
+    text-align: left;
+    padding: 12px 16px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-dim);
+    border-bottom: 1px solid var(--border);
+  }
+  td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    color: var(--text);
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.015); }
+  tr.total td { font-weight: 700; color: #fff; background: rgba(255,255,255,0.03); }
+  td code, th code, p code, li code {
+    background: var(--code-bg);
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--code-text);
+    border: 1px solid var(--border);
+  }
+
+  /* ─── CODE BLOCKS ─── */
+  pre {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 20px 24px;
+    overflow-x: auto;
+    margin: 14px 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--text-dim);
+    position: relative;
+  }
+  pre .hl { color: var(--accent2); }
+  pre .comment { color: var(--text-muted); }
+  pre .val { color: var(--yellow); }
+  pre .key { color: var(--code-text); }
+
+  /* ─── TAGS ─── */
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+  .tag::before { content: ''; width: 6px; height: 6px; border-radius: 50%; }
+  .tag.green { background: var(--green-dim); color: var(--green); }
+  .tag.green::before { background: var(--green); }
+  .tag.yellow { background: var(--yellow-dim); color: var(--yellow); }
+  .tag.yellow::before { background: var(--yellow); }
+  .tag.orange { background: var(--orange-dim); color: var(--orange); }
+  .tag.orange::before { background: var(--orange); }
+
+  /* ─── REWARD LAYER CARDS ─── */
+  .layers { display: flex; flex-direction: column; gap: 12px; margin: 20px 0; }
+  .layer {
+    display: flex;
+    gap: 16px;
+    padding: 20px 22px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    align-items: flex-start;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .layer:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,0.15); }
+  .layer.green { background: var(--green-dim); border-color: rgba(52,211,153,0.15); }
+  .layer.yellow { background: var(--yellow-dim); border-color: rgba(251,191,36,0.15); }
+  .layer.orange { background: var(--orange-dim); border-color: rgba(249,115,22,0.15); }
+  .layer-icon {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .layer.green .layer-icon { background: rgba(52,211,153,0.15); }
+  .layer.yellow .layer-icon { background: rgba(251,191,36,0.15); }
+  .layer.orange .layer-icon { background: rgba(249,115,22,0.15); }
+  .layer-title { font-weight: 700; color: #fff; font-size: 15px; margin-bottom: 4px; }
+  .layer-desc { font-size: 14px; color: var(--text-dim); line-height: 1.6; }
+
+  /* ─── STEP INDICATOR ─── */
+  .step-badge {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    background: rgba(111,92,229,0.1);
+    border: 1px solid rgba(111,92,229,0.2);
+    padding: 3px 10px;
+    border-radius: 100px;
+    margin-bottom: 8px;
+  }
+
+  /* ─── FLOW DIAGRAM ─── */
+  .flow-container {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 32px 28px;
+    margin: 20px 0;
+    overflow-x: auto;
+  }
+  .flow-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 12px 0;
+    position: relative;
+  }
+  .flow-step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 44px;
+    bottom: -12px;
+    width: 1px;
+    background: linear-gradient(to bottom, var(--accent), var(--accent2));
+    opacity: 0.3;
+  }
+  .flow-node {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+    background: rgba(111,92,229,0.12);
+    border: 1px solid rgba(111,92,229,0.25);
+  }
+  .flow-text { flex: 1; padding-top: 4px; }
+  .flow-label { font-size: 14px; font-weight: 600; color: #fff; }
+  .flow-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; font-family: 'JetBrains Mono', monospace; }
+  .flow-step.split { padding-left: 48px; }
+  .flow-step.split .flow-node { width: 24px; height: 24px; font-size: 11px; border-radius: 6px; }
+
+  /* ─── ORDERED LISTS ─── */
+  ol { margin: 12px 0 16px 0; list-style: none; counter-reset: steps; }
+  ol li {
+    counter-increment: steps;
+    display: flex;
+    gap: 14px;
+    align-items: baseline;
+    margin-bottom: 12px;
+    font-size: 15px;
+  }
+  ol li::before {
+    content: counter(steps);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent);
+    background: rgba(111,92,229,0.1);
+    border: 1px solid rgba(111,92,229,0.2);
+    width: 24px; height: 24px;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  /* ─── BOOKMARK LINKS ─── */
+  .bookmark {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    margin: 14px 0;
+    text-decoration: none;
+    color: var(--text);
+    transition: all 0.25s;
+    background: var(--bg-card);
+  }
+  .bookmark:hover {
+    border-color: var(--accent);
+    box-shadow: 0 0 20px var(--accent-glow);
+    transform: translateY(-1px);
+  }
+  .bookmark-icon {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    background: rgba(111,92,229,0.1);
+    flex-shrink: 0;
+  }
+  .bookmark-title { font-weight: 600; font-size: 14px; color: #fff; }
+  .bookmark-url { font-size: 12px; color: var(--text-muted); margin-top: 2px; font-family: 'JetBrains Mono', monospace; }
+
+  /* ─── CONTRACTS TABLE ─── */
+  .contract-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin: 10px 0;
+    background: var(--bg-card);
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .contract-name { font-weight: 600; font-size: 14px; color: #fff; }
+  .contract-addr {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--text-muted);
+    word-break: break-all;
+  }
+
+  /* ─── FAQ TOGGLES ─── */
+  .faq-list { margin: 20px 0; display: flex; flex-direction: column; gap: 8px; }
+  details {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    background: var(--bg-card);
+  }
+  details[open] {
+    border-color: rgba(111,92,229,0.25);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+  }
+  summary {
+    padding: 16px 20px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 15px;
+    color: #fff;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    user-select: none;
+    transition: background 0.2s;
+  }
+  summary::-webkit-details-marker { display: none; }
+  summary::before {
+    content: '+';
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px;
+    color: var(--accent);
+    width: 24px; height: 24px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 6px;
+    background: rgba(111,92,229,0.1);
+    flex-shrink: 0;
+    transition: transform 0.2s;
+  }
+  details[open] summary::before { content: '−'; }
+  summary:hover { background: rgba(255,255,255,0.02); }
+  .faq-answer {
+    padding: 0 20px 20px 56px;
+    font-size: 14.5px;
+    line-height: 1.7;
+    color: var(--text-dim);
+  }
+
+  /* ─── DIVIDER ─── */
+  .divider {
+    border: none;
+    height: 1px;
+    background: var(--border);
+    margin: 48px 0;
+  }
+
+  /* ─── SCROLL ANIMATIONS ─── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ─── FOOTER ─── */
+  .footer {
+    text-align: center;
+    padding: 40px 0;
+    font-size: 13px;
+    color: var(--text-muted);
+    border-top: 1px solid var(--border);
+  }
+  .footer a { color: var(--accent); text-decoration: none; }
+
+  @media (max-width: 640px) {
+    .page { padding: 0 20px 80px; }
+    section { margin-top: 56px; }
+    .hero { min-height: 340px; padding-bottom: 40px; }
+    .flow-step.split { padding-left: 32px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ─── HERO ─── -->
+<div class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-noise"></div>
+  <div class="hero-orb a"></div>
+  <div class="hero-orb b"></div>
+  <div class="hero-content">
+    <div class="hero-badge"><span class="dot"></span> Graph Horizon · Delegation Guide</div>
+    <h1>Understanding GRT<br><em>Delegation</em></h1>
+    <p class="hero-sub">How delegation pools, autocompounding rewards, and withdrawals work — with on-chain verification methods.</p>
+  </div>
+</div>
+
+<!-- ─── NAV DOTS ─── -->
+<nav class="nav-dots" id="navDots">
+  <button class="nav-dot active" onclick="scrollTo('#s1')"><span class="tooltip">What is Delegation?</span></button>
+  <button class="nav-dot" onclick="scrollTo('#s2')"><span class="tooltip">Pool Mechanics</span></button>
+  <button class="nav-dot" onclick="scrollTo('#s3')"><span class="tooltip">Step by Step</span></button>
+  <button class="nav-dot" onclick="scrollTo('#s4')"><span class="tooltip">Reward Layers</span></button>
+  <button class="nav-dot" onclick="scrollTo('#s5')"><span class="tooltip">Real vs Estimated</span></button>
+  <button class="nav-dot" onclick="scrollTo('#s6')"><span class="tooltip">How Rewards Flow</span></button>
+  <button class="nav-dot" onclick="scrollTo('#s7')"><span class="tooltip">Undelegation</span></button>
+  <button class="nav-dot" onclick="scrollTo('#s8')"><span class="tooltip">Verify On-Chain</span></button>
+  <button class="nav-dot" onclick="scrollTo('#s9')"><span class="tooltip">FAQ</span></button>
+</nav>
+
+<div class="page">
+
+  <!-- ─── WHAT IS DELEGATION ─── -->
+  <section id="s1" class="reveal">
+    <h2><span class="num">01</span>What is Delegation?</h2>
+    <div class="section-line"></div>
+    <div class="callout quote">
+      <div class="callout-icon">💡</div>
+      <div class="callout-text">
+        When you delegate GRT to an indexer, your tokens enter a shared pool. You no longer hold GRT directly — you hold <strong>shares</strong> in that indexer's pool. Think of it like depositing into a vault. As the indexer earns rewards, the vault grows, and your shares become worth more.
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ─── POOL MECHANICS ─── -->
+  <section id="s2" class="reveal">
+    <h2><span class="num">02</span>How the Delegation Pool Works</h2>
+    <div class="section-line"></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Term</th><th>What It Means</th></tr></thead>
+        <tbody>
+          <tr><td><code>tokens</code></td><td>Total GRT in the pool — includes all delegator deposits + all accumulated rewards</td></tr>
+          <tr><td><code>shares</code></td><td>Total shares issued to all delegators — stays constant unless someone delegates or undelegates</td></tr>
+          <tr><td>Exchange Rate</td><td><code>tokens ÷ shares</code> — increases over time as rewards flow in</td></tr>
+          <tr><td>Your Balance</td><td><code>your_shares × exchange_rate</code> — grows automatically without any action from you</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ─── STEP BY STEP ─── -->
+  <section id="s3" class="reveal">
+    <h2><span class="num">03</span>What Happens When You Delegate</h2>
+    <div class="section-line"></div>
+
+    <h3><span class="step-badge">Step 1</span> You delegate 10,000 GRT</h3>
+    <p>The pool already has other delegators and accumulated rewards:</p>
+<pre><span class="comment">Pool BEFORE:</span>
+  <span class="key">tokens:</span>  <span class="val">500,000</span> GRT
+  <span class="key">shares:</span>  <span class="val">400,000</span>
+  <span class="key">rate:</span>    <span class="val">1.25</span> GRT per share</pre>
+    <p>You receive shares at the current rate:</p>
+<pre><span class="hl">Your shares</span> = 10,000 ÷ 1.25 = <span class="val">8,000 shares</span></pre>
+<pre><span class="comment">Pool AFTER:</span>
+  <span class="key">tokens:</span>  <span class="val">510,000</span> GRT  <span class="comment">(+10,000 from you)</span>
+  <span class="key">shares:</span>  <span class="val">408,000</span>       <span class="comment">(+8,000 for you)</span>
+  <span class="key">rate:</span>    <span class="val">still 1.25</span></pre>
+
+    <h3><span class="step-badge">Step 2</span> Indexer earns rewards</h3>
+    <p>The indexer submits a Proof of Indexing (POI). 5,000 GRT in rewards are minted and deposited to the pool:</p>
+<pre><span class="comment">Pool AFTER rewards:</span>
+  <span class="key">tokens:</span>  <span class="val">515,000</span> GRT  <span class="comment">(+5,000 rewards)</span>
+  <span class="key">shares:</span>  <span class="val">408,000</span>       <span class="comment">(unchanged!)</span>
+  <span class="key">rate:</span>    <span class="val">1.2623</span></pre>
+<pre><span class="comment">Your position:</span>
+  <span class="key">balance</span> = 8,000 × 1.2623 = <span class="val">10,098.04</span> GRT
+  <span class="key">rewards</span> = <span class="hl">+98.04 GRT</span></pre>
+    <p>You did nothing. The pool grew. Your shares are now worth more. <strong>This is autocompounding.</strong></p>
+
+    <h3><span class="step-badge">Step 3</span> Six months later</h3>
+<pre><span class="comment">Pool:</span>
+  <span class="key">tokens:</span>  <span class="val">560,000</span> GRT
+  <span class="key">shares:</span>  <span class="val">408,000</span>
+  <span class="key">rate:</span>    <span class="val">1.3725</span>
+
+<span class="comment">Your position:</span>
+  <span class="key">balance</span> = 8,000 × 1.3725 = <span class="val">10,980.39</span> GRT
+  <span class="key">rewards</span> = <span class="hl">+980.39 GRT (+9.8%)</span></pre>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ─── REWARD LAYERS ─── -->
+  <section id="s4" class="reveal">
+    <h2><span class="num">04</span>The Three Layers of Rewards</h2>
+    <div class="section-line"></div>
+    <div class="layers">
+      <div class="layer green">
+        <div class="layer-icon">🟢</div>
+        <div>
+          <div class="layer-title">Realized Rewards</div>
+          <div class="layer-desc">GRT you've fully withdrawn to your wallet by completing the undelegate → thaw → withdraw process. These are done — the GRT is yours.</div>
+        </div>
+      </div>
+      <div class="layer yellow">
+        <div class="layer-icon">🟡</div>
+        <div>
+          <div class="layer-title">Unrealized — Earned (On-Chain)</div>
+          <div class="layer-desc">Rewards that have been <strong style="color:#fff">minted as real GRT</strong> and deposited into the delegation pool. They exist in the contract right now. You can verify them on Arbiscan.<br><br><code>earned = (your_shares × pool_tokens ÷ pool_shares) - original_delegation</code></div>
+        </div>
+      </div>
+      <div class="layer orange">
+        <div class="layer-icon">🟠</div>
+        <div>
+          <div class="layer-title">Unrealized — Estimated (Pending)</div>
+          <div class="layer-desc">Rewards accrued in the RewardsManager but <strong style="color:#fff">NOT minted yet</strong>. They become real only when the indexer submits a POI. The Explorer <strong style="color:#fff">includes these estimates</strong> in the "Unrealized" number.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ─── REAL VS ESTIMATED ─── -->
+  <section id="s5" class="reveal">
+    <h2><span class="num">05</span>What's Real vs What's Estimated</h2>
+    <div class="section-line"></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Layer</th><th>Real GRT on-chain?</th><th>When does it become real?</th><th>In Explorer?</th></tr></thead>
+        <tbody>
+          <tr><td><span class="tag green">Realized</span></td><td>Yes — in your wallet</td><td>Already withdrawn</td><td>Yes</td></tr>
+          <tr><td><span class="tag yellow">Earned</span></td><td>Yes — in the contract</td><td>When you withdraw</td><td>Yes</td></tr>
+          <tr><td><span class="tag orange">Estimated</span></td><td><strong>No</strong> — not minted yet</td><td>When indexer collects POI</td><td><strong>Yes</strong> — blended</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Real-World Verification</h3>
+    <p>Delegator <code>0x418c...e027</code> — comparing on-chain data to the Explorer:</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Indexer</th><th>Original</th><th>On-Chain</th><th>Explorer</th><th>Gap</th></tr></thead>
+        <tbody>
+          <tr><td>lunanova</td><td>52,090</td><td>2,786</td><td>2,780</td><td>~6 GRT</td></tr>
+          <tr><td>ellipfra</td><td>52,000</td><td>881</td><td>881</td><td>~0 GRT</td></tr>
+          <tr><td>pinax</td><td>37,230</td><td>93</td><td>93</td><td>~0 GRT</td></tr>
+          <tr><td>wavefive</td><td>25,000</td><td>192</td><td>198</td><td>~6 GRT</td></tr>
+          <tr class="total"><td>Total</td><td>166,320</td><td>3,953</td><td>3,960</td><td>~7 GRT</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout info">
+      <div class="callout-icon">🔍</div>
+      <div class="callout-text">The ~7 GRT gap = estimated pending rewards in the RewardsManager. Small, but it explains why rewards appear "instantly."</div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ─── HOW REWARDS FLOW ─── -->
+  <section id="s6" class="reveal">
+    <h2><span class="num">06</span>How Rewards Flow</h2>
+    <div class="section-line"></div>
+    <div class="flow-container">
+      <div class="flow-step">
+        <div class="flow-node">⛏</div>
+        <div class="flow-text">
+          <div class="flow-label">GRT issuance per block</div>
+          <div class="flow-sub">protocol inflation → new GRT created</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-node">📦</div>
+        <div class="flow-text">
+          <div class="flow-label">Accumulates in RewardsManager</div>
+          <div class="flow-sub">"Estimated" rewards live here</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-node">✅</div>
+        <div class="flow-text">
+          <div class="flow-label">Indexer submits POI → GRT minted</div>
+          <div class="flow-sub">becomes real on-chain here</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-node">✂️</div>
+        <div class="flow-text">
+          <div class="flow-label">Split by delegationFeeCut</div>
+        </div>
+      </div>
+      <div class="flow-step split">
+        <div class="flow-node">→</div>
+        <div class="flow-text">
+          <div class="flow-label">Indexer's share → their stake</div>
+        </div>
+      </div>
+      <div class="flow-step split">
+        <div class="flow-node">→</div>
+        <div class="flow-text">
+          <div class="flow-label">Delegators' share → addToDelegationPool()</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-node">📈</div>
+        <div class="flow-text">
+          <div class="flow-label">pool.tokens increases, shares unchanged</div>
+          <div class="flow-sub">"Earned" rewards live here → autocompounding</div>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-node">💰</div>
+        <div class="flow-text">
+          <div class="flow-label">Undelegate → Thaw → Withdraw</div>
+          <div class="flow-sub">"Realized" rewards</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ─── UNDELEGATION ─── -->
+  <section id="s7" class="reveal">
+    <h2><span class="num">07</span>How to Withdraw (Undelegation)</h2>
+    <div class="section-line"></div>
+    <ol>
+      <li><strong>Undelegate</strong> — Your shares move from active to thawing. A countdown begins.</li>
+      <li><strong>Wait for thawing period</strong> — Tokens are locked and no longer earning rewards.</li>
+      <li><strong>Withdraw</strong> — GRT transfers to your wallet. Now shows as "Realized" in Explorer.</li>
+    </ol>
+    <div class="callout warn">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-text"><strong>Important:</strong> Once you undelegate, your tokens <strong>stop earning rewards</strong> during the thawing period. Only undelegate when you're ready to exit.</div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ─── VERIFY ON CHAIN ─── -->
+  <section id="s8" class="reveal">
+    <h2><span class="num">08</span>Verify Your Balance On-Chain</h2>
+    <div class="section-line"></div>
+
+    <h3>Method 1 — Arbiscan</h3>
+    <ol>
+      <li>Go to Horizon Staking on Arbiscan</li>
+      <li>Call <code>getDelegation</code> → enter indexer, verifier (<code>0xb2Bb...1105</code>), your address → note your <strong>shares</strong></li>
+      <li>Call <code>getDelegationPool</code> → enter indexer, same verifier → note <strong>tokens</strong> and <strong>shares</strong></li>
+      <li>Calculate: <code>(pool_tokens × your_shares) ÷ pool_shares</code> → divide by 10¹⁸</li>
+    </ol>
+    <a class="bookmark" href="https://arbiscan.io/address/0x00669A4CF01450B64E8A2A20E9b1FCB71E61eF03#readProxyContract" target="_blank">
+      <div class="bookmark-icon">🔗</div>
+      <div><div class="bookmark-title">Horizon Staking — Arbiscan</div><div class="bookmark-url">arbiscan.io/address/0x00669A4CF01450B64E8A2A20E9b1FCB71E61eF03</div></div>
+    </a>
+
+    <h3>Method 2 — GRT Dashboard</h3>
+    <p>Enter your address, pick your indexer, see everything pulled live from the contract.</p>
+    <a class="bookmark" href="https://paulieb14.github.io/grt-delegation-dashboard/" target="_blank">
+      <div class="bookmark-icon">📈</div>
+      <div><div class="bookmark-title">GRT Delegation Dashboard</div><div class="bookmark-url">paulieb14.github.io/grt-delegation-dashboard</div></div>
+    </a>
+
+    <h3>Method 3 — Command Line (cast)</h3>
+<pre><span class="comment"># Get your shares</span>
+cast call 0x00669A4CF01450B64E8A2A20E9b1FCB71E61eF03 \
+  <span class="val">"getDelegation(address,address,address)(uint256)"</span> \
+  <span class="key">&lt;INDEXER_ADDRESS&gt;</span> \
+  0xb2Bb92d0DE618878E438b55D5846cfecD9301105 \
+  <span class="key">&lt;YOUR_ADDRESS&gt;</span> \
+  --rpc-url https://arb1.arbitrum.io/rpc
+
+<span class="comment"># Get pool data</span>
+cast call 0x00669A4CF01450B64E8A2A20E9b1FCB71E61eF03 \
+  <span class="val">"getDelegationPool(address,address)(uint256,uint256,uint256,uint256,uint256)"</span> \
+  <span class="key">&lt;INDEXER_ADDRESS&gt;</span> \
+  0xb2Bb92d0DE618878E438b55D5846cfecD9301105 \
+  --rpc-url https://arb1.arbitrum.io/rpc</pre>
+
+    <h3 style="margin-top:40px">Key Contracts</h3>
+    <div class="contract-row">
+      <span class="contract-name">Horizon Staking</span>
+      <span class="contract-addr">0x00669A4CF01450B64E8A2A20E9b1FCB71E61eF03</span>
+    </div>
+    <div class="contract-row">
+      <span class="contract-name">SubgraphService (Verifier)</span>
+      <span class="contract-addr">0xb2Bb92d0DE618878E438b55D5846cfecD9301105</span>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ─── FAQ ─── -->
+  <section id="s9" class="reveal">
+    <h2><span class="num">09</span>FAQ</h2>
+    <div class="section-line"></div>
+    <div class="faq-list">
+      <details>
+        <summary>Why do I see unrealized rewards immediately after delegating?</summary>
+        <div class="faq-answer">The Explorer estimates pending rewards from the RewardsManager that haven't been minted yet. The contract itself would show ~0, but the Explorer adds the estimated portion.</div>
+      </details>
+      <details>
+        <summary>Are my rewards compounding?</summary>
+        <div class="faq-answer">Yes, automatically. Rewards increase <code>pool.tokens</code> while your shares stay the same. Your larger balance earns proportionally more on the next distribution.</div>
+      </details>
+      <details>
+        <summary>What determines how much reward I get?</summary>
+        <div class="faq-answer"><strong>Indexer performance</strong> — POIs submitted, allocations active. <strong>Delegation fee cut</strong> — the percentage the indexer shares with you. <strong>Your pool share</strong> — your shares ÷ total shares.</div>
+      </details>
+      <details>
+        <summary>Is there still a delegation tax?</summary>
+        <div class="faq-answer">No. The 0.5% tax from the legacy contract was removed in Horizon.</div>
+      </details>
+      <details>
+        <summary>Contract balance vs Explorer balance?</summary>
+        <div class="faq-answer">Contract = earned rewards only (real GRT). Explorer = earned + estimated pending. The gap is typically small.</div>
+      </details>
+    </div>
+  </section>
+
+  <div class="footer">
+    Built for <a href="https://thegraph.com" target="_blank">The Graph</a> community · Graph Horizon
+  </div>
+
+</div>
+
+<script>
+// Scroll reveal
+const reveals = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
+}, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+reveals.forEach(el => observer.observe(el));
+
+// Nav dots
+const sections = document.querySelectorAll('section[id]');
+const dots = document.querySelectorAll('.nav-dot');
+const navObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const idx = [...sections].indexOf(e.target);
+      dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+    }
+  });
+}, { threshold: 0.3 });
+sections.forEach(s => navObserver.observe(s));
+
+function scrollTo(sel) {
+  document.querySelector(sel)?.scrollIntoView({ behavior: 'smooth' });
+}
+</script>
+
+</body>
+</html>
