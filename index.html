@@ -51,17 +51,28 @@
 
   ::selection { background: var(--accent); color: white; }
 
-  /* ─── SCROLL PROGRESS BAR ─── */
+  /* ─── SCROLL PROGRESS BAR (CSS scroll-driven) ─── */
   .progress-bar {
     position: fixed;
     top: 0;
     left: 0;
+    width: 100%;
     height: 3px;
     background: linear-gradient(90deg, var(--accent), var(--accent2));
     z-index: 9999;
-    width: 0%;
-    transition: width 0.1s linear;
+    transform-origin: left;
+    transform: scaleX(0);
     box-shadow: 0 0 12px var(--accent-glow);
+  }
+  @supports (animation-timeline: scroll()) {
+    .progress-bar {
+      animation: progressGrow linear;
+      animation-timeline: scroll();
+    }
+    @keyframes progressGrow {
+      from { transform: scaleX(0); }
+      to { transform: scaleX(1); }
+    }
   }
 
   /* ─── HERO ─── */
@@ -419,15 +430,21 @@
   .layer-title { font-weight: 700; color: #fff; font-size: 15px; margin-bottom: 4px; }
   .layer-desc { font-size: 14px; color: var(--text-dim); line-height: 1.6; }
 
-  /* ─── STAGGERED REVEAL ─── */
+  /* ─── STAGGERED REVEAL (CSS scroll-driven) ─── */
   .stagger-item {
-    opacity: 0;
-    transform: translateY(20px);
-    transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-  .stagger-item.visible {
     opacity: 1;
     transform: translateY(0);
+  }
+  @supports (animation-timeline: view()) {
+    .stagger-item {
+      animation: staggerUp linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 80%;
+    }
+    @keyframes staggerUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
   }
 
   /* ─── STEP BADGE ─── */
@@ -727,15 +744,21 @@
     margin: 48px 0;
   }
 
-  /* ─── SCROLL REVEAL ─── */
+  /* ─── SCROLL REVEAL (CSS scroll-driven) ─── */
   .reveal {
-    opacity: 0;
-    transform: translateY(24px);
-    transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-  .reveal.visible {
     opacity: 1;
     transform: translateY(0);
+  }
+  @supports (animation-timeline: view()) {
+    .reveal {
+      animation: revealUp linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 100%;
+    }
+    @keyframes revealUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
   }
 
   /* ─── FOOTER ─── */
@@ -771,6 +794,7 @@
     .reveal, .stagger-item {
       opacity: 1 !important;
       transform: none !important;
+      animation: none !important;
     }
     .hero-orb, .hero-grid, .hero-content {
       transform: none !important;
@@ -781,7 +805,7 @@
     .hscroll-track { flex-direction: column !important; transform: none !important; padding: 0 !important; }
     .hscroll-card { min-width: 100% !important; margin-left: 0 !important; margin-bottom: 16px; }
     .hscroll-progress { display: none !important; }
-    .progress-bar { display: none !important; }
+    .progress-bar { display: none !important; animation: none !important; }
     .scroll-arrow { animation: none !important; }
     .hero-scroll-hint { opacity: 1 !important; }
     .hero-badge, .hero h1, .hero-sub {
@@ -1190,15 +1214,6 @@ cast call 0x00669A4CF01450B64E8A2A20E9b1FCB71E61eF03 \
 // ─── REDUCED MOTION CHECK ───
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-// ─── SCROLL PROGRESS BAR ───
-const progressBar = document.getElementById('progressBar');
-function updateProgress() {
-  const scrollTop = window.scrollY;
-  const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-  const progress = (scrollTop / docHeight) * 100;
-  progressBar.style.width = progress + '%';
-}
-
 // ─── PARALLAX HERO ───
 const hero = document.getElementById('hero');
 const parallaxEls = hero.querySelectorAll('[data-parallax]');
@@ -1234,28 +1249,6 @@ function updateHorizontalScroll() {
   pips.forEach((p, i) => p.classList.toggle('active', i === step));
 }
 
-// ─── SCROLL REVEAL ───
-const reveals = document.querySelectorAll('.reveal');
-const revealObserver = new IntersectionObserver((entries) => {
-  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
-}, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
-reveals.forEach(el => revealObserver.observe(el));
-
-// ─── STAGGERED REVEAL ───
-const staggerContainers = document.querySelectorAll('.layers, .flow-container, .scenario-grid');
-const staggerObserver = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      const items = entry.target.querySelectorAll('.stagger-item');
-      items.forEach((item, i) => {
-        setTimeout(() => item.classList.add('visible'), i * 120);
-      });
-      staggerObserver.unobserve(entry.target);
-    }
-  });
-}, { threshold: 0.15 });
-staggerContainers.forEach(c => staggerObserver.observe(c));
-
 // ─── NAV DOTS ───
 const sections = document.querySelectorAll('section[id], .hscroll-outer[id]');
 const dots = document.querySelectorAll('.nav-dot');
@@ -1278,7 +1271,6 @@ let ticking = false;
 window.addEventListener('scroll', () => {
   if (!ticking) {
     requestAnimationFrame(() => {
-      updateProgress();
       updateParallax();
       updateHorizontalScroll();
       ticking = false;
@@ -1287,8 +1279,7 @@ window.addEventListener('scroll', () => {
   }
 }, { passive: true });
 
-// Init
-updateProgress();
+
 </script>
 
 </body>
