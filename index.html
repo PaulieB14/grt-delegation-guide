@@ -26,6 +26,8 @@
     --yellow-dim: rgba(251,191,36,0.12);
     --orange: #f97316;
     --orange-dim: rgba(249,115,22,0.12);
+    --red: #f87171;
+    --red-dim: rgba(248,113,113,0.12);
     --blue: #60a5fa;
     --blue-dim: rgba(96,165,250,0.1);
     --code-bg: rgba(255,255,255,0.04);
@@ -49,14 +51,27 @@
 
   ::selection { background: var(--accent); color: white; }
 
+  /* ─── SCROLL PROGRESS BAR ─── */
+  .progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    z-index: 9999;
+    width: 0%;
+    transition: width 0.1s linear;
+    box-shadow: 0 0 12px var(--accent-glow);
+  }
+
   /* ─── HERO ─── */
   .hero {
     position: relative;
-    min-height: 420px;
+    min-height: 100vh;
     display: flex;
-    align-items: flex-end;
+    align-items: center;
     overflow: hidden;
-    padding: 0 0 56px;
+    padding: 0;
   }
   .hero-bg {
     position: absolute;
@@ -68,17 +83,13 @@
   }
   .hero-grid {
     position: absolute;
-    inset: 0;
+    inset: -60px;
     background-image:
       linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
       linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
     background-size: 60px 60px;
     mask-image: linear-gradient(to bottom, black 30%, transparent);
-    animation: gridDrift 20s linear infinite;
-  }
-  @keyframes gridDrift {
-    from { transform: translateY(0); }
-    to { transform: translateY(60px); }
+    will-change: transform;
   }
   .hero-noise {
     position: absolute;
@@ -89,18 +100,13 @@
   }
   .hero-orb {
     position: absolute;
-    width: 300px;
-    height: 300px;
     border-radius: 50%;
     filter: blur(100px);
-    animation: orbFloat 8s ease-in-out infinite;
+    will-change: transform;
   }
-  .hero-orb.a { background: rgba(111,92,229,0.3); top: -60px; right: 15%; animation-delay: 0s; }
-  .hero-orb.b { background: rgba(46,205,167,0.15); top: 40px; right: 35%; animation-delay: -3s; width: 200px; height: 200px; }
-  @keyframes orbFloat {
-    0%, 100% { transform: translate(0, 0) scale(1); }
-    50% { transform: translate(20px, -20px) scale(1.08); }
-  }
+  .hero-orb.a { background: rgba(111,92,229,0.35); top: -80px; right: 10%; width: 400px; height: 400px; }
+  .hero-orb.b { background: rgba(46,205,167,0.15); top: 60px; right: 40%; width: 250px; height: 250px; }
+  .hero-orb.c { background: rgba(111,92,229,0.12); bottom: 10%; left: 5%; width: 300px; height: 300px; }
 
   .hero-content {
     position: relative;
@@ -123,6 +129,9 @@
     color: var(--text-dim);
     margin-bottom: 24px;
     backdrop-filter: blur(12px);
+    opacity: 0;
+    transform: translateY(20px);
+    animation: heroFadeIn 0.8s 0.2s forwards;
   }
   .hero-badge .dot {
     width: 8px; height: 8px;
@@ -135,14 +144,20 @@
     0%, 100% { opacity: 1; transform: scale(1); }
     50% { opacity: 0.6; transform: scale(0.85); }
   }
+  @keyframes heroFadeIn {
+    to { opacity: 1; transform: translateY(0); }
+  }
   .hero h1 {
     font-family: 'Instrument Serif', Georgia, serif;
-    font-size: clamp(36px, 5.5vw, 58px);
+    font-size: clamp(40px, 6vw, 64px);
     font-weight: 400;
-    line-height: 1.12;
-    letter-spacing: -0.025em;
+    line-height: 1.08;
+    letter-spacing: -0.03em;
     color: #fff;
-    margin-bottom: 16px;
+    margin-bottom: 20px;
+    opacity: 0;
+    transform: translateY(30px);
+    animation: heroFadeIn 0.8s 0.4s forwards;
   }
   .hero h1 em {
     font-style: italic;
@@ -152,10 +167,44 @@
     background-clip: text;
   }
   .hero-sub {
-    font-size: 17px;
+    font-size: 18px;
     color: var(--text-dim);
     max-width: 540px;
     line-height: 1.65;
+    opacity: 0;
+    transform: translateY(30px);
+    animation: heroFadeIn 0.8s 0.6s forwards;
+  }
+  .hero-scroll-hint {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    opacity: 0;
+    animation: heroFadeIn 0.8s 1.2s forwards;
+  }
+  .hero-scroll-hint span {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+  .scroll-arrow {
+    width: 20px;
+    height: 20px;
+    border-right: 2px solid var(--text-muted);
+    border-bottom: 2px solid var(--text-muted);
+    transform: rotate(45deg);
+    animation: scrollBounce 2s infinite;
+  }
+  @keyframes scrollBounce {
+    0%, 100% { transform: rotate(45deg) translate(0, 0); opacity: 0.4; }
+    50% { transform: rotate(45deg) translate(4px, 4px); opacity: 1; }
   }
 
   /* ─── NAV DOTS ─── */
@@ -211,10 +260,7 @@
     padding: 0 32px 140px;
   }
 
-  /* ─── SECTIONS ─── */
-  section {
-    margin-top: 80px;
-  }
+  section { margin-top: 80px; }
 
   /* ─── HEADINGS ─── */
   h2 {
@@ -251,7 +297,6 @@
   }
 
   p { margin-bottom: 14px; color: var(--text); }
-
   strong { color: #fff; font-weight: 600; }
 
   /* ─── CALLOUT ─── */
@@ -264,35 +309,11 @@
     border: 1px solid var(--border);
     backdrop-filter: blur(8px);
   }
-  .callout.quote {
-    background: linear-gradient(135deg, rgba(111,92,229,0.06), rgba(46,205,167,0.04));
-    border-color: rgba(111,92,229,0.2);
-  }
-  .callout.warn {
-    background: var(--yellow-dim);
-    border-color: rgba(251,191,36,0.2);
-  }
-  .callout.info {
-    background: var(--blue-dim);
-    border-color: rgba(96,165,250,0.2);
-  }
+  .callout.quote { background: linear-gradient(135deg, rgba(111,92,229,0.06), rgba(46,205,167,0.04)); border-color: rgba(111,92,229,0.2); }
+  .callout.warn { background: var(--yellow-dim); border-color: rgba(251,191,36,0.2); }
+  .callout.info { background: var(--blue-dim); border-color: rgba(96,165,250,0.2); }
   .callout-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
   .callout-text { flex: 1; font-size: 15px; line-height: 1.65; }
-
-  /* ─── GLASS CARD ─── */
-  .card {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 24px;
-    margin: 20px 0;
-    backdrop-filter: blur(12px);
-    transition: border-color 0.3s, box-shadow 0.3s;
-  }
-  .card:hover {
-    border-color: var(--border-hover);
-    box-shadow: 0 8px 40px rgba(0,0,0,0.2);
-  }
 
   /* ─── TABLES ─── */
   .table-wrap {
@@ -398,7 +419,18 @@
   .layer-title { font-weight: 700; color: #fff; font-size: 15px; margin-bottom: 4px; }
   .layer-desc { font-size: 14px; color: var(--text-dim); line-height: 1.6; }
 
-  /* ─── STEP INDICATOR ─── */
+  /* ─── STAGGERED REVEAL ─── */
+  .stagger-item {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .stagger-item.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ─── STEP BADGE ─── */
   .step-badge {
     display: inline-block;
     font-family: 'JetBrains Mono', monospace;
@@ -412,6 +444,70 @@
     padding: 3px 10px;
     border-radius: 100px;
     margin-bottom: 8px;
+  }
+
+  /* ─── HORIZONTAL SCROLL SECTION ─── */
+  .hscroll-outer {
+    height: 300vh;
+    position: relative;
+  }
+  .hscroll-sticky {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+  }
+  .hscroll-track {
+    display: flex;
+    gap: 32px;
+    padding: 0 32px 0 0;
+    will-change: transform;
+  }
+  .hscroll-card {
+    min-width: min(520px, 80vw);
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 36px 32px;
+    flex-shrink: 0;
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+  .hscroll-card:hover {
+    border-color: var(--border-hover);
+    box-shadow: 0 12px 48px rgba(0,0,0,0.25);
+  }
+  .hscroll-card h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+  }
+  .hscroll-label {
+    position: absolute;
+    top: 32px;
+    left: 32px;
+    z-index: 2;
+  }
+  .hscroll-label h2 { margin-bottom: 4px; }
+  .hscroll-progress {
+    display: flex;
+    gap: 8px;
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  .hscroll-pip {
+    width: 32px;
+    height: 3px;
+    border-radius: 2px;
+    background: var(--text-muted);
+    transition: all 0.3s;
+  }
+  .hscroll-pip.active {
+    background: var(--accent);
+    width: 48px;
+    box-shadow: 0 0 8px var(--accent-glow);
   }
 
   /* ─── FLOW DIAGRAM ─── */
@@ -443,9 +539,7 @@
   .flow-node {
     width: 32px; height: 32px;
     border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex; align-items: center; justify-content: center;
     font-size: 14px;
     flex-shrink: 0;
     background: rgba(111,92,229,0.12);
@@ -580,6 +674,41 @@
     color: var(--text-dim);
   }
 
+  /* ─── SCENARIO CARDS ─── */
+  .scenario-grid { display: flex; flex-direction: column; gap: 16px; margin: 20px 0; }
+  .scenario {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: border-color 0.3s;
+  }
+  .scenario:hover { border-color: var(--border-hover); }
+  .scenario-header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 16px 20px;
+    font-weight: 600; color: #fff; font-size: 15px;
+  }
+  .scenario-header .icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .scenario.dilute .scenario-header { background: var(--red-dim); }
+  .scenario.dilute .icon { background: rgba(248,113,113,0.15); }
+  .scenario.concentrate .scenario-header { background: var(--green-dim); }
+  .scenario.concentrate .icon { background: rgba(52,211,153,0.15); }
+  .scenario.whale .scenario-header { background: var(--blue-dim); }
+  .scenario.whale .icon { background: rgba(96,165,250,0.15); }
+  .scenario-body {
+    padding: 20px;
+    background: var(--bg-card);
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--text-dim);
+  }
+
   /* ─── DIVIDER ─── */
   .divider {
     border: none;
@@ -588,7 +717,7 @@
     margin: 48px 0;
   }
 
-  /* ─── SCROLL ANIMATIONS ─── */
+  /* ─── SCROLL REVEAL ─── */
   .reveal {
     opacity: 0;
     transform: translateY(24px);
@@ -612,43 +741,58 @@
   @media (max-width: 640px) {
     .page { padding: 0 20px 80px; }
     section { margin-top: 56px; }
-    .hero { min-height: 340px; padding-bottom: 40px; }
+    .hero { min-height: 100vh; }
     .flow-step.split { padding-left: 32px; }
+    .hscroll-outer { height: auto; }
+    .hscroll-sticky { position: relative; height: auto; flex-direction: column; }
+    .hscroll-track { flex-direction: column; padding: 0; transform: none !important; }
+    .hscroll-card { min-width: 100%; }
+    .hscroll-label { position: relative; top: auto; left: auto; margin-bottom: 16px; }
+    .hscroll-progress { display: none; }
   }
 </style>
 </head>
 <body>
 
+<!-- ─── PROGRESS BAR ─── -->
+<div class="progress-bar" id="progressBar"></div>
+
 <!-- ─── HERO ─── -->
-<div class="hero">
+<div class="hero" id="hero">
   <div class="hero-bg"></div>
-  <div class="hero-grid"></div>
+  <div class="hero-grid" data-parallax="0.3"></div>
   <div class="hero-noise"></div>
-  <div class="hero-orb a"></div>
-  <div class="hero-orb b"></div>
-  <div class="hero-content">
+  <div class="hero-orb a" data-parallax="0.15"></div>
+  <div class="hero-orb b" data-parallax="0.25"></div>
+  <div class="hero-orb c" data-parallax="0.1"></div>
+  <div class="hero-content" data-parallax="0.5">
     <div class="hero-badge"><span class="dot"></span> Graph Horizon · Delegation Guide</div>
     <h1>Understanding GRT<br><em>Delegation</em></h1>
     <p class="hero-sub">How delegation pools, autocompounding rewards, and withdrawals work — with on-chain verification methods.</p>
+  </div>
+  <div class="hero-scroll-hint">
+    <span>Scroll to explore</span>
+    <div class="scroll-arrow"></div>
   </div>
 </div>
 
 <!-- ─── NAV DOTS ─── -->
 <nav class="nav-dots" id="navDots">
-  <button class="nav-dot active" onclick="scrollTo('#s1')"><span class="tooltip">What is Delegation?</span></button>
-  <button class="nav-dot" onclick="scrollTo('#s2')"><span class="tooltip">Pool Mechanics</span></button>
-  <button class="nav-dot" onclick="scrollTo('#s3')"><span class="tooltip">Step by Step</span></button>
-  <button class="nav-dot" onclick="scrollTo('#s4')"><span class="tooltip">Reward Layers</span></button>
-  <button class="nav-dot" onclick="scrollTo('#s5')"><span class="tooltip">Real vs Estimated</span></button>
-  <button class="nav-dot" onclick="scrollTo('#s6')"><span class="tooltip">How Rewards Flow</span></button>
-  <button class="nav-dot" onclick="scrollTo('#s7')"><span class="tooltip">Undelegation</span></button>
-  <button class="nav-dot" onclick="scrollTo('#s8')"><span class="tooltip">Verify On-Chain</span></button>
-  <button class="nav-dot" onclick="scrollTo('#s9')"><span class="tooltip">FAQ</span></button>
+  <button class="nav-dot active" onclick="smoothScroll('#s1')"><span class="tooltip">What is Delegation?</span></button>
+  <button class="nav-dot" onclick="smoothScroll('#s2')"><span class="tooltip">Pool Mechanics</span></button>
+  <button class="nav-dot" onclick="smoothScroll('#s3')"><span class="tooltip">Step by Step</span></button>
+  <button class="nav-dot" onclick="smoothScroll('#s4')"><span class="tooltip">Pool Dynamics</span></button>
+  <button class="nav-dot" onclick="smoothScroll('#s5')"><span class="tooltip">Reward Layers</span></button>
+  <button class="nav-dot" onclick="smoothScroll('#s6')"><span class="tooltip">Real vs Estimated</span></button>
+  <button class="nav-dot" onclick="smoothScroll('#s7')"><span class="tooltip">How Rewards Flow</span></button>
+  <button class="nav-dot" onclick="smoothScroll('#s8')"><span class="tooltip">Undelegation</span></button>
+  <button class="nav-dot" onclick="smoothScroll('#s9')"><span class="tooltip">Verify On-Chain</span></button>
+  <button class="nav-dot" onclick="smoothScroll('#s10')"><span class="tooltip">FAQ</span></button>
 </nav>
 
 <div class="page">
 
-  <!-- ─── WHAT IS DELEGATION ─── -->
+  <!-- ─── 01 WHAT IS DELEGATION ─── -->
   <section id="s1" class="reveal">
     <h2><span class="num">01</span>What is Delegation?</h2>
     <div class="section-line"></div>
@@ -662,7 +806,7 @@
 
   <hr class="divider">
 
-  <!-- ─── POOL MECHANICS ─── -->
+  <!-- ─── 02 POOL MECHANICS ─── -->
   <section id="s2" class="reveal">
     <h2><span class="num">02</span>How the Delegation Pool Works</h2>
     <div class="section-line"></div>
@@ -681,26 +825,35 @@
 
   <hr class="divider">
 
-  <!-- ─── STEP BY STEP ─── -->
-  <section id="s3" class="reveal">
-    <h2><span class="num">03</span>What Happens When You Delegate</h2>
-    <div class="section-line"></div>
+</div><!-- end .page before horizontal scroll -->
 
-    <h3><span class="step-badge">Step 1</span> You delegate 10,000 GRT</h3>
-    <p>The pool already has other delegators and accumulated rewards:</p>
+<!-- ─── 03 HORIZONTAL SCROLL WALKTHROUGH ─── -->
+<div class="hscroll-outer" id="s3">
+  <div class="hscroll-sticky">
+    <div class="hscroll-label">
+      <h2 style="margin-left:32px"><span class="num">03</span>What Happens When You Delegate</h2>
+      <div class="section-line" style="margin-left:32px"></div>
+    </div>
+    <div class="hscroll-track" id="hscrollTrack">
+
+      <div class="hscroll-card" style="margin-left: max(calc((100vw - 800px)/2 + 32px), 32px)">
+        <h3><span class="step-badge">Step 1</span> You delegate 10,000 GRT</h3>
+        <p>The pool already has other delegators and accumulated rewards:</p>
 <pre><span class="comment">Pool BEFORE:</span>
   <span class="key">tokens:</span>  <span class="val">500,000</span> GRT
   <span class="key">shares:</span>  <span class="val">400,000</span>
   <span class="key">rate:</span>    <span class="val">1.25</span> GRT per share</pre>
-    <p>You receive shares at the current rate:</p>
+        <p>You receive shares at the current rate:</p>
 <pre><span class="hl">Your shares</span> = 10,000 ÷ 1.25 = <span class="val">8,000 shares</span></pre>
 <pre><span class="comment">Pool AFTER:</span>
   <span class="key">tokens:</span>  <span class="val">510,000</span> GRT  <span class="comment">(+10,000 from you)</span>
   <span class="key">shares:</span>  <span class="val">408,000</span>       <span class="comment">(+8,000 for you)</span>
   <span class="key">rate:</span>    <span class="val">still 1.25</span></pre>
+      </div>
 
-    <h3><span class="step-badge">Step 2</span> Indexer earns rewards</h3>
-    <p>The indexer submits a Proof of Indexing (POI). 5,000 GRT in rewards are minted and deposited to the pool:</p>
+      <div class="hscroll-card">
+        <h3><span class="step-badge">Step 2</span> Indexer earns rewards</h3>
+        <p>The indexer submits a Proof of Indexing (POI). 5,000 GRT in rewards are minted and deposited to the pool:</p>
 <pre><span class="comment">Pool AFTER rewards:</span>
   <span class="key">tokens:</span>  <span class="val">515,000</span> GRT  <span class="comment">(+5,000 rewards)</span>
   <span class="key">shares:</span>  <span class="val">408,000</span>       <span class="comment">(unchanged!)</span>
@@ -708,9 +861,11 @@
 <pre><span class="comment">Your position:</span>
   <span class="key">balance</span> = 8,000 × 1.2623 = <span class="val">10,098.04</span> GRT
   <span class="key">rewards</span> = <span class="hl">+98.04 GRT</span></pre>
-    <p>You did nothing. The pool grew. Your shares are now worth more. <strong>This is autocompounding.</strong></p>
+        <p>You did nothing. The pool grew. Your shares are now worth more. <strong>This is autocompounding.</strong></p>
+      </div>
 
-    <h3><span class="step-badge">Step 3</span> Six months later</h3>
+      <div class="hscroll-card">
+        <h3><span class="step-badge">Step 3</span> Six months later</h3>
 <pre><span class="comment">Pool:</span>
   <span class="key">tokens:</span>  <span class="val">560,000</span> GRT
   <span class="key">shares:</span>  <span class="val">408,000</span>
@@ -719,30 +874,104 @@
 <span class="comment">Your position:</span>
   <span class="key">balance</span> = 8,000 × 1.3725 = <span class="val">10,980.39</span> GRT
   <span class="key">rewards</span> = <span class="hl">+980.39 GRT (+9.8%)</span></pre>
+        <p style="margin-top:16px">Your 10,000 GRT grew to 10,980 GRT without any action. The exchange rate did all the work — each share just kept becoming worth more GRT as rewards flowed in.</p>
+      </div>
+
+    </div>
+    <div class="hscroll-progress">
+      <div class="hscroll-pip active" id="pip0"></div>
+      <div class="hscroll-pip" id="pip1"></div>
+      <div class="hscroll-pip" id="pip2"></div>
+    </div>
+  </div>
+</div>
+
+<div class="page">
+
+  <hr class="divider">
+
+  <!-- ─── 04 POOL DYNAMICS — NEW SECTION ─── -->
+  <section id="s4" class="reveal">
+    <h2><span class="num">04</span>When Others Delegate or Undelegate</h2>
+    <div class="section-line"></div>
+    <p>You're not alone in the pool. Other delegators joining or leaving affects the dynamics. Here's what actually happens:</p>
+
+    <div class="scenario-grid">
+      <div class="scenario dilute stagger-item">
+        <div class="scenario-header">
+          <div class="icon">📉</div>
+          Someone delegates a large amount (Dilution)
+        </div>
+        <div class="scenario-body">
+          <p>A whale delegates 500,000 GRT into the same pool. They receive new shares at the current exchange rate. The pool's <code>tokens</code> and <code>shares</code> both increase proportionally.</p>
+<pre><span class="comment">BEFORE whale delegates:</span>
+  <span class="key">pool tokens:</span>  <span class="val">515,000</span>  |  <span class="key">pool shares:</span>  <span class="val">408,000</span>
+  <span class="key">your shares:</span> <span class="val">8,000</span> = <span class="hl">1.96%</span> of pool
+
+<span class="comment">Whale deposits 500,000 GRT → gets 396,194 new shares</span>
+
+<span class="comment">AFTER whale delegates:</span>
+  <span class="key">pool tokens:</span>  <span class="val">1,015,000</span>  |  <span class="key">pool shares:</span>  <span class="val">804,194</span>
+  <span class="key">your shares:</span> <span class="val">8,000</span> = <span class="hl">0.99%</span> of pool</pre>
+          <p style="margin-top:12px"><strong>Your GRT balance doesn't change.</strong> Your shares are still worth the same amount. But your <em>percentage of the pool</em> shrinks, so you earn a smaller slice of future rewards. The exchange rate stays the same — no value is lost, only your future earning share decreases.</p>
+        </div>
+      </div>
+
+      <div class="scenario concentrate stagger-item">
+        <div class="scenario-header">
+          <div class="icon">📈</div>
+          Someone undelegates a large amount (Concentration)
+        </div>
+        <div class="scenario-body">
+          <p>A large delegator exits the pool. Their shares are burned and tokens move to thawing.</p>
+<pre><span class="comment">BEFORE whale undelegates:</span>
+  <span class="key">your shares:</span> <span class="val">8,000</span> = <span class="hl">0.99%</span> of pool
+
+<span class="comment">Whale undelegates 396,194 shares</span>
+
+<span class="comment">AFTER whale undelegates:</span>
+  <span class="key">your shares:</span> <span class="val">8,000</span> = <span class="hl">1.96%</span> of pool</pre>
+          <p style="margin-top:12px"><strong>Your balance still doesn't change.</strong> But now you own a bigger percentage of the pool, so you earn a larger slice of future rewards. This is a tailwind for remaining delegators.</p>
+        </div>
+      </div>
+
+      <div class="scenario whale stagger-item">
+        <div class="scenario-header">
+          <div class="icon">🔑</div>
+          The key takeaway
+        </div>
+        <div class="scenario-body">
+          <p><strong>Other delegators joining or leaving never changes your current balance.</strong> The exchange rate ensures your shares are always worth the correct amount of GRT. What changes is your <em>share of future rewards</em>:</p>
+          <p style="margin-top:8px">• More delegators = your future reward slice gets smaller<br>
+          • Fewer delegators = your future reward slice gets bigger<br>
+          • The pool's exchange rate <strong>never goes down</strong> from delegation activity — it only goes up from rewards</p>
+        </div>
+      </div>
+    </div>
   </section>
 
   <hr class="divider">
 
-  <!-- ─── REWARD LAYERS ─── -->
-  <section id="s4" class="reveal">
-    <h2><span class="num">04</span>The Three Layers of Rewards</h2>
+  <!-- ─── 05 REWARD LAYERS ─── -->
+  <section id="s5" class="reveal">
+    <h2><span class="num">05</span>The Three Layers of Rewards</h2>
     <div class="section-line"></div>
     <div class="layers">
-      <div class="layer green">
+      <div class="layer green stagger-item">
         <div class="layer-icon">🟢</div>
         <div>
           <div class="layer-title">Realized Rewards</div>
           <div class="layer-desc">GRT you've fully withdrawn to your wallet by completing the undelegate → thaw → withdraw process. These are done — the GRT is yours.</div>
         </div>
       </div>
-      <div class="layer yellow">
+      <div class="layer yellow stagger-item">
         <div class="layer-icon">🟡</div>
         <div>
           <div class="layer-title">Unrealized — Earned (On-Chain)</div>
           <div class="layer-desc">Rewards that have been <strong style="color:#fff">minted as real GRT</strong> and deposited into the delegation pool. They exist in the contract right now. You can verify them on Arbiscan.<br><br><code>earned = (your_shares × pool_tokens ÷ pool_shares) - original_delegation</code></div>
         </div>
       </div>
-      <div class="layer orange">
+      <div class="layer orange stagger-item">
         <div class="layer-icon">🟠</div>
         <div>
           <div class="layer-title">Unrealized — Estimated (Pending)</div>
@@ -754,9 +983,9 @@
 
   <hr class="divider">
 
-  <!-- ─── REAL VS ESTIMATED ─── -->
-  <section id="s5" class="reveal">
-    <h2><span class="num">05</span>What's Real vs What's Estimated</h2>
+  <!-- ─── 06 REAL VS ESTIMATED ─── -->
+  <section id="s6" class="reveal">
+    <h2><span class="num">06</span>What's Real vs What's Estimated</h2>
     <div class="section-line"></div>
     <div class="table-wrap">
       <table>
@@ -791,72 +1020,27 @@
 
   <hr class="divider">
 
-  <!-- ─── HOW REWARDS FLOW ─── -->
-  <section id="s6" class="reveal">
-    <h2><span class="num">06</span>How Rewards Flow</h2>
+  <!-- ─── 07 HOW REWARDS FLOW ─── -->
+  <section id="s7" class="reveal">
+    <h2><span class="num">07</span>How Rewards Flow</h2>
     <div class="section-line"></div>
     <div class="flow-container">
-      <div class="flow-step">
-        <div class="flow-node">⛏</div>
-        <div class="flow-text">
-          <div class="flow-label">GRT issuance per block</div>
-          <div class="flow-sub">protocol inflation → new GRT created</div>
-        </div>
-      </div>
-      <div class="flow-step">
-        <div class="flow-node">📦</div>
-        <div class="flow-text">
-          <div class="flow-label">Accumulates in RewardsManager</div>
-          <div class="flow-sub">"Estimated" rewards live here</div>
-        </div>
-      </div>
-      <div class="flow-step">
-        <div class="flow-node">✅</div>
-        <div class="flow-text">
-          <div class="flow-label">Indexer submits POI → GRT minted</div>
-          <div class="flow-sub">becomes real on-chain here</div>
-        </div>
-      </div>
-      <div class="flow-step">
-        <div class="flow-node">✂️</div>
-        <div class="flow-text">
-          <div class="flow-label">Split by delegationFeeCut</div>
-        </div>
-      </div>
-      <div class="flow-step split">
-        <div class="flow-node">→</div>
-        <div class="flow-text">
-          <div class="flow-label">Indexer's share → their stake</div>
-        </div>
-      </div>
-      <div class="flow-step split">
-        <div class="flow-node">→</div>
-        <div class="flow-text">
-          <div class="flow-label">Delegators' share → addToDelegationPool()</div>
-        </div>
-      </div>
-      <div class="flow-step">
-        <div class="flow-node">📈</div>
-        <div class="flow-text">
-          <div class="flow-label">pool.tokens increases, shares unchanged</div>
-          <div class="flow-sub">"Earned" rewards live here → autocompounding</div>
-        </div>
-      </div>
-      <div class="flow-step">
-        <div class="flow-node">💰</div>
-        <div class="flow-text">
-          <div class="flow-label">Undelegate → Thaw → Withdraw</div>
-          <div class="flow-sub">"Realized" rewards</div>
-        </div>
-      </div>
+      <div class="flow-step stagger-item"><div class="flow-node">⛏</div><div class="flow-text"><div class="flow-label">GRT issuance per block</div><div class="flow-sub">protocol inflation → new GRT created</div></div></div>
+      <div class="flow-step stagger-item"><div class="flow-node">📦</div><div class="flow-text"><div class="flow-label">Accumulates in RewardsManager</div><div class="flow-sub">"Estimated" rewards live here</div></div></div>
+      <div class="flow-step stagger-item"><div class="flow-node">✅</div><div class="flow-text"><div class="flow-label">Indexer submits POI → GRT minted</div><div class="flow-sub">becomes real on-chain here</div></div></div>
+      <div class="flow-step stagger-item"><div class="flow-node">✂️</div><div class="flow-text"><div class="flow-label">Split by delegationFeeCut</div></div></div>
+      <div class="flow-step split stagger-item"><div class="flow-node">→</div><div class="flow-text"><div class="flow-label">Indexer's share → their stake</div></div></div>
+      <div class="flow-step split stagger-item"><div class="flow-node">→</div><div class="flow-text"><div class="flow-label">Delegators' share → addToDelegationPool()</div></div></div>
+      <div class="flow-step stagger-item"><div class="flow-node">📈</div><div class="flow-text"><div class="flow-label">pool.tokens increases, shares unchanged</div><div class="flow-sub">"Earned" rewards live here → autocompounding</div></div></div>
+      <div class="flow-step stagger-item"><div class="flow-node">💰</div><div class="flow-text"><div class="flow-label">Undelegate → Thaw → Withdraw</div><div class="flow-sub">"Realized" rewards</div></div></div>
     </div>
   </section>
 
   <hr class="divider">
 
-  <!-- ─── UNDELEGATION ─── -->
-  <section id="s7" class="reveal">
-    <h2><span class="num">07</span>How to Withdraw (Undelegation)</h2>
+  <!-- ─── 08 UNDELEGATION ─── -->
+  <section id="s8" class="reveal">
+    <h2><span class="num">08</span>How to Withdraw (Undelegation)</h2>
     <div class="section-line"></div>
     <ol>
       <li><strong>Undelegate</strong> — Your shares move from active to thawing. A countdown begins.</li>
@@ -871,9 +1055,9 @@
 
   <hr class="divider">
 
-  <!-- ─── VERIFY ON CHAIN ─── -->
-  <section id="s8" class="reveal">
-    <h2><span class="num">08</span>Verify Your Balance On-Chain</h2>
+  <!-- ─── 09 VERIFY ON CHAIN ─── -->
+  <section id="s9" class="reveal">
+    <h2><span class="num">09</span>Verify Your Balance On-Chain</h2>
     <div class="section-line"></div>
 
     <h3>Method 1 — Arbiscan</h3>
@@ -924,9 +1108,9 @@ cast call 0x00669A4CF01450B64E8A2A20E9b1FCB71E61eF03 \
 
   <hr class="divider">
 
-  <!-- ─── FAQ ─── -->
-  <section id="s9" class="reveal">
-    <h2><span class="num">09</span>FAQ</h2>
+  <!-- ─── 10 FAQ ─── -->
+  <section id="s10" class="reveal">
+    <h2><span class="num">10</span>FAQ</h2>
     <div class="section-line"></div>
     <div class="faq-list">
       <details>
@@ -940,6 +1124,10 @@ cast call 0x00669A4CF01450B64E8A2A20E9b1FCB71E61eF03 \
       <details>
         <summary>What determines how much reward I get?</summary>
         <div class="faq-answer"><strong>Indexer performance</strong> — POIs submitted, allocations active. <strong>Delegation fee cut</strong> — the percentage the indexer shares with you. <strong>Your pool share</strong> — your shares ÷ total shares.</div>
+      </details>
+      <details>
+        <summary>Does someone else delegating reduce my balance?</summary>
+        <div class="faq-answer">No — your GRT balance stays exactly the same. But your <em>share of future rewards</em> decreases because you now own a smaller percentage of the pool. Conversely, when someone undelegates, your future reward share increases.</div>
       </details>
       <details>
         <summary>Is there still a delegation tax?</summary>
@@ -959,15 +1147,74 @@ cast call 0x00669A4CF01450B64E8A2A20E9b1FCB71E61eF03 \
 </div>
 
 <script>
-// Scroll reveal
-const reveals = document.querySelectorAll('.reveal');
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
-}, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
-reveals.forEach(el => observer.observe(el));
+// ─── SCROLL PROGRESS BAR ───
+const progressBar = document.getElementById('progressBar');
+function updateProgress() {
+  const scrollTop = window.scrollY;
+  const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+  const progress = (scrollTop / docHeight) * 100;
+  progressBar.style.width = progress + '%';
+}
 
-// Nav dots
-const sections = document.querySelectorAll('section[id]');
+// ─── PARALLAX HERO ───
+const hero = document.getElementById('hero');
+const parallaxEls = hero.querySelectorAll('[data-parallax]');
+function updateParallax() {
+  const scrollTop = window.scrollY;
+  const heroHeight = hero.offsetHeight;
+  if (scrollTop > heroHeight) return;
+  parallaxEls.forEach(el => {
+    const speed = parseFloat(el.getAttribute('data-parallax'));
+    el.style.transform = `translateY(${scrollTop * speed}px)`;
+  });
+  // Fade hero content on scroll
+  const heroContent = hero.querySelector('.hero-content');
+  const opacity = 1 - (scrollTop / (heroHeight * 0.6));
+  heroContent.style.opacity = Math.max(0, opacity);
+}
+
+// ─── HORIZONTAL SCROLL ───
+const hscrollOuter = document.getElementById('s3');
+const hscrollTrack = document.getElementById('hscrollTrack');
+const pips = [document.getElementById('pip0'), document.getElementById('pip1'), document.getElementById('pip2')];
+function updateHorizontalScroll() {
+  if (!hscrollOuter || !hscrollTrack || window.innerWidth <= 640) return;
+  const rect = hscrollOuter.getBoundingClientRect();
+  const outerHeight = hscrollOuter.offsetHeight;
+  const viewportH = window.innerHeight;
+  const scrollable = outerHeight - viewportH;
+  const progress = Math.min(1, Math.max(0, -rect.top / scrollable));
+  const totalTrackWidth = hscrollTrack.scrollWidth - window.innerWidth;
+  hscrollTrack.style.transform = `translateX(${-progress * totalTrackWidth}px)`;
+  // Update pips
+  const step = Math.min(2, Math.floor(progress * 3));
+  pips.forEach((p, i) => p.classList.toggle('active', i === step));
+}
+
+// ─── SCROLL REVEAL ───
+const reveals = document.querySelectorAll('.reveal');
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+reveals.forEach(el => revealObserver.observe(el));
+
+// ─── STAGGERED REVEAL ───
+const staggerContainers = document.querySelectorAll('.layers, .flow-container, .scenario-grid');
+const staggerObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const items = entry.target.querySelectorAll('.stagger-item');
+      items.forEach((item, i) => {
+        setTimeout(() => item.classList.add('visible'), i * 120);
+      });
+      staggerObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.15 });
+staggerContainers.forEach(c => staggerObserver.observe(c));
+
+// ─── NAV DOTS ───
+const sections = document.querySelectorAll('section[id], .hscroll-outer[id]');
 const dots = document.querySelectorAll('.nav-dot');
 const navObserver = new IntersectionObserver((entries) => {
   entries.forEach(e => {
@@ -976,12 +1223,29 @@ const navObserver = new IntersectionObserver((entries) => {
       dots.forEach((d, i) => d.classList.toggle('active', i === idx));
     }
   });
-}, { threshold: 0.3 });
+}, { threshold: 0.2 });
 sections.forEach(s => navObserver.observe(s));
 
-function scrollTo(sel) {
+function smoothScroll(sel) {
   document.querySelector(sel)?.scrollIntoView({ behavior: 'smooth' });
 }
+
+// ─── RAF LOOP ───
+let ticking = false;
+window.addEventListener('scroll', () => {
+  if (!ticking) {
+    requestAnimationFrame(() => {
+      updateProgress();
+      updateParallax();
+      updateHorizontalScroll();
+      ticking = false;
+    });
+    ticking = true;
+  }
+}, { passive: true });
+
+// Init
+updateProgress();
 </script>
 
 </body>
