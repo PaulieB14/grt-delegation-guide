@@ -750,6 +750,36 @@
     .hscroll-label { position: relative; top: auto; left: auto; margin-bottom: 16px; }
     .hscroll-progress { display: none; }
   }
+
+  /* ─── REDUCED MOTION (Accessibility) ─── */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+    .reveal, .stagger-item {
+      opacity: 1 !important;
+      transform: none !important;
+    }
+    .hero-orb, .hero-grid, .hero-content {
+      transform: none !important;
+      will-change: auto !important;
+    }
+    .hscroll-outer { height: auto !important; }
+    .hscroll-sticky { position: relative !important; height: auto !important; }
+    .hscroll-track { flex-direction: column !important; transform: none !important; padding: 0 !important; }
+    .hscroll-card { min-width: 100% !important; margin-left: 0 !important; margin-bottom: 16px; }
+    .hscroll-progress { display: none !important; }
+    .progress-bar { display: none !important; }
+    .scroll-arrow { animation: none !important; }
+    .hero-scroll-hint { opacity: 1 !important; }
+    .hero-badge, .hero h1, .hero-sub {
+      opacity: 1 !important;
+      transform: none !important;
+      animation: none !important;
+    }
+  }
 </style>
 </head>
 <body>
@@ -1147,6 +1177,9 @@ cast call 0x00669A4CF01450B64E8A2A20E9b1FCB71E61eF03 \
 </div>
 
 <script>
+// ─── REDUCED MOTION CHECK ───
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
 // ─── SCROLL PROGRESS BAR ───
 const progressBar = document.getElementById('progressBar');
 function updateProgress() {
@@ -1160,6 +1193,7 @@ function updateProgress() {
 const hero = document.getElementById('hero');
 const parallaxEls = hero.querySelectorAll('[data-parallax]');
 function updateParallax() {
+  if (prefersReducedMotion) return;
   const scrollTop = window.scrollY;
   const heroHeight = hero.offsetHeight;
   if (scrollTop > heroHeight) return;
@@ -1167,7 +1201,6 @@ function updateParallax() {
     const speed = parseFloat(el.getAttribute('data-parallax'));
     el.style.transform = `translateY(${scrollTop * speed}px)`;
   });
-  // Fade hero content on scroll
   const heroContent = hero.querySelector('.hero-content');
   const opacity = 1 - (scrollTop / (heroHeight * 0.6));
   heroContent.style.opacity = Math.max(0, opacity);
@@ -1178,7 +1211,7 @@ const hscrollOuter = document.getElementById('s3');
 const hscrollTrack = document.getElementById('hscrollTrack');
 const pips = [document.getElementById('pip0'), document.getElementById('pip1'), document.getElementById('pip2')];
 function updateHorizontalScroll() {
-  if (!hscrollOuter || !hscrollTrack || window.innerWidth <= 640) return;
+  if (prefersReducedMotion || !hscrollOuter || !hscrollTrack || window.innerWidth <= 640) return;
   const rect = hscrollOuter.getBoundingClientRect();
   const outerHeight = hscrollOuter.offsetHeight;
   const viewportH = window.innerHeight;
