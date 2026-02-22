@@ -466,13 +466,23 @@
     will-change: transform;
   }
   .hscroll-card {
-    min-width: min(520px, 80vw);
+    width: min(520px, 80vw);
+    max-width: min(520px, 80vw);
     background: var(--bg-elevated);
     border: 1px solid var(--border);
     border-radius: 16px;
     padding: 36px 32px;
     flex-shrink: 0;
+    overflow: hidden;
     transition: border-color 0.3s, box-shadow 0.3s;
+  }
+  .hscroll-card p {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+  .hscroll-card pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
   }
   .hscroll-card:hover {
     border-color: var(--border-hover);
