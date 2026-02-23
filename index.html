@@ -1180,12 +1180,45 @@
     <div class="section-line"></div>
 
     <h3>Method 1 — Arbiscan</h3>
+
+    <h3 style="margin-top:20px"><span class="step-badge">Step 1</span> Get Your Shares</h3>
     <ol>
-      <li>Go to Horizon Staking on Arbiscan</li>
-      <li>Call <code>getDelegation</code> → enter indexer, verifier (<code>0xb2Bb...1105</code>), your address → note your <strong>shares</strong></li>
-      <li>Call <code>getDelegationPool</code> → enter indexer, same verifier → note <strong>tokens</strong> and <strong>shares</strong></li>
-      <li>Calculate: <code>(pool_tokens × your_shares) ÷ pool_shares</code> → divide by 10¹⁸</li>
+      <li>Go to the Horizon Staking contract on Arbiscan (link below) → <strong>Read as Proxy</strong> tab</li>
+      <li>Find the function <code>getDelegation</code> (#15)</li>
+      <li>Fill in the parameters:<br>
+        <code>serviceProvider</code>: your indexer's address<br>
+        <code>verifier</code>: <code>0xb2Bb92d0DE618878E438b55D5846cfecD9301105</code><br>
+        <code>delegator</code>: your address</li>
+      <li>Click <strong>Query</strong> → note the <strong>shares</strong> value (in wei, 18 decimals)</li>
     </ol>
+
+    <h3><span class="step-badge">Step 2</span> Get the Pool Data</h3>
+    <ol>
+      <li>On the same page, find <code>getDelegationPool</code> (#16)</li>
+      <li>Fill in the parameters:<br>
+        <code>serviceProvider</code>: your indexer's address<br>
+        <code>verifier</code>: <code>0xb2Bb92d0DE618878E438b55D5846cfecD9301105</code></li>
+      <li>Click <strong>Query</strong> → note the values:<br>
+        <strong>tokens</strong> (total GRT in the pool, includes accumulated rewards)<br>
+        <strong>shares</strong> (total shares in the pool)</li>
+    </ol>
+
+    <h3><span class="step-badge">Step 3</span> Calculate Your Balance</h3>
+    <p><code>Your Balance = (pool_tokens × your_shares) ÷ pool_shares</code></p>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Value</th><th>Wei</th><th>GRT</th></tr></thead>
+        <tbody>
+          <tr><td>Your shares</td><td><code>727310575543420075474198</code></td><td>727,310.58</td></tr>
+          <tr><td>Pool tokens</td><td><code>116295368653350960437180533</code></td><td>116,295,368.65</td></tr>
+          <tr><td>Pool shares</td><td><code>65803669777282022756168215</code></td><td>65,803,669.78</td></tr>
+        </tbody>
+      </table>
+    </div>
+<pre><span class="comment">Calculation:</span>
+(<span class="val">116,295,368.65</span> × <span class="val">727,310.58</span>) ÷ <span class="val">65,803,669.78</span> = <span class="hl">1,285,382 GRT</span></pre>
+
     <a class="bookmark" href="https://arbiscan.io/address/0x00669A4CF01450B64E8A2A20E9b1FCB71E61eF03#readProxyContract" target="_blank">
       <div class="bookmark-icon">🔗</div>
       <div><div class="bookmark-title">Horizon Staking — Arbiscan</div><div class="bookmark-url">arbiscan.io/address/0x00669A4CF01450B64E8A2A20E9b1FCB71E61eF03</div></div>
@@ -1193,9 +1226,9 @@
 
     <h3>Method 2 — GRT Dashboard</h3>
     <p>Enter your address, pick your indexer, see everything pulled live from the contract.</p>
-    <a class="bookmark" href="https://paulieb14.github.io/grt-delegation-dashboard/" target="_blank">
+    <a class="bookmark" href="https://grt-delegation-dashboard.vercel.app/" target="_blank">
       <div class="bookmark-icon">📈</div>
-      <div><div class="bookmark-title">GRT Delegation Dashboard</div><div class="bookmark-url">paulieb14.github.io/grt-delegation-dashboard</div></div>
+      <div><div class="bookmark-title">GRT Delegation Dashboard</div><div class="bookmark-url">grt-delegation-dashboard.vercel.app</div></div>
     </a>
 
     <h3>Method 3 — Command Line (cast)</h3>
